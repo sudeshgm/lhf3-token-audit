@@ -1,0 +1,13 @@
+# Pinned; validated on CPU (python 3.13, torch 2.6.0+cpu). On Linux GPU boxes the default
+# PyPI torch==2.6.0 wheel ships CUDA 12.4 (needs NVIDIA driver >= 525).
+torch==2.6.0
+transformers==4.51.3
+accelerate==1.6.0
+datasets==3.5.0
+huggingface_hub==0.30.2
+pillow==11.2.1
+numpy==2.2.5
+pyarrow==19.0.1
+sentencepiece==0.2.1
+protobuf==5.29.4
+pytest==8.3.5

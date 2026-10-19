@@ -1,0 +1,16 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "dtype": "float16",
+  "decoding": "greedy",
+  "max_new_tokens": 128,
+  "n_visual_tokens": 576,
+  "retention": {"0.01": 6, "0.05": 29, "0.10": 58, "0.25": 144},
+  "baseline": {"mode": "full", "k": 576},
+  "arms": {"random": {"seeds": [0, 1, 2]}, "keep_last_k": {"seeds": [null]}},
+  "benchmarks": {
+    "gqa": {"dataset": "lmms-lab/GQA", "config": "testdev_balanced_instructions + testdev_balanced_images", "split": "testdev", "metric": "accuracy (exact match)"},
+    "pope": {"dataset": "lmms-lab/POPE", "split": "test", "subsets": ["random", "popular", "adversarial"], "metric": "F1 + accuracy per subset"},
+    "textvqa": {"dataset": "lmms-lab/textvqa", "split": "validation", "metric": "VQA accuracy (EvalAI normalization)", "prompt": "LLaVA-1.5 with Reference OCR tokens"}
+  },
+  "smoke": {"limit": 20, "runs": [["full", 576, null], ["random", 58, 0], ["keep_last_k", 58, null]], "sources": "data/smoke/{bench}.parquet"}
+}
