@@ -1,0 +1,19 @@
+{
+  "description": "LHF3 Exp -1 step 2. Main: full POPE (9000), full TextVQA val (5000), GQA 5k subset. Seed variance: random seeds 1,2 on the 1k subsets. Seed 0 on the 1k subsets = seed-0 main runs restricted to those ids (per-sample seeding depends only on (seed, sid)).",
+  "subsets": {
+    "main": {"gqa": "subsets/gqa_5k.json", "pope": null, "textvqa": null},
+    "1k": {"gqa": "subsets/gqa_1k.json", "pope": "subsets/pope_1k_per_split.json", "textvqa": "subsets/textvqa_1k.json"}
+  },
+  "gate": {"bench": "textvqa", "limit": 200, "min_acc": 0.53, "mode": "full"},
+  "configs": [
+    {"subset": "main", "mode": "full",        "k": 576, "seed": null, "benches": ["textvqa", "pope", "gqa"]},
+    {"subset": "main", "mode": "random",      "k": 58,  "seed": 0,    "benches": ["textvqa", "pope", "gqa"]},
+    {"subset": "main", "mode": "keep_last_k", "k": 58,  "seed": null, "benches": ["textvqa", "pope", "gqa"]},
+    {"subset": "main", "mode": "random",      "k": 144, "seed": 0,    "benches": ["textvqa", "pope", "gqa"]},
+    {"subset": "main", "mode": "keep_last_k", "k": 144, "seed": null, "benches": ["textvqa", "pope", "gqa"]},
+    {"subset": "1k",   "mode": "random",      "k": 58,  "seed": 1,    "benches": ["textvqa", "pope", "gqa"]},
+    {"subset": "1k",   "mode": "random",      "k": 58,  "seed": 2,    "benches": ["textvqa", "pope", "gqa"]},
+    {"subset": "1k",   "mode": "random",      "k": 144, "seed": 1,    "benches": ["textvqa", "pope", "gqa"]},
+    {"subset": "1k",   "mode": "random",      "k": 144, "seed": 2,    "benches": ["textvqa", "pope", "gqa"]}
+  ]
+}

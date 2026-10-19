@@ -28,14 +28,18 @@ Per sample (batch 1):
 
 Full-576 through this path is numerically identical to HF's native path (tested, `tests/test_pruning.py`).
 
-## Prompts and scoring (LLaVA-1.5 protocol)
-- Template: `"<system> USER: <image>\n{question}\nAnswer the question using a single word or phrase. ASSISTANT:"`, system = vicuna_v1.
-- **TextVQA: WITH OCR tokens** (`{question}\nReference OCR token: t1, t2, ...\nAnswer the question using a single word or phrase.`),
+## Prompts and scoring (LLaVA-1.5 protocol, audited in step 2A, see RUNLOG.md)
+Audited row by row against LLaVA's official eval files (`third_party/llava_eval`, `scripts/audit_llava_protocol.py`):
+our prompts are byte-identical for GQA 12578/12578, TextVQA 5000/5000 and POPE 8721/8721 matched rows, and our
+scorers reproduce the paper numbers on the official 13B answers (GQA 63.31, TextVQA 61.25, POPE F1 86.0).
+
+- Template: `"<system> USER: <image>\n{question}\nAnswer the question using a single word or phrase. ASSISTANT:"`, system = conv_vicuna_v1 ("A chat between a curious user ...").
+- **TextVQA: WITH OCR tokens** (`{question.capitalize()}\nReference OCR token: t1, t2, ...\nAnswer the question using a single word or phrase.`),
   matching LLaVA-1.5's published `llava_textvqa_val_v051_ocr.jsonl`; tokens = `ocr_tokens` field of lmms-lab/textvqa.
   (lmms-eval's default is `ocr: false`; set `--textvqa_ocr 0` for that variant.) Logged as `protocol.textvqa_ocr` in every JSON.
-- GQA: exact match after lowercase + strip trailing period (LLaVA `eval_gqa.py`).
+- GQA: `pred.rstrip('.').lower() == gold` (LLaVA `convert_gqa_for_eval.py` + GQA eval).
 - POPE: LLaVA `eval_pope.py` yes/no parsing; acc, precision, recall, F1, yes-ratio per split.
-- TextVQA: EvalAI answer normalisation + 10-choose-9 VQA accuracy (m4c `TextVQAAccuracyEvaluator`).
+- TextVQA: verbatim copy of LLaVA's m4c `TextVQAAccuracyEvaluator` + `EvalAIAnswerProcessor` (`third_party/m4c_evaluator.py`).
 
 ## Random arm seeding
 `random` with seed s ∈ {0,1,2}: each sample gets its own index set from `torch.randperm` seeded by
@@ -46,15 +50,19 @@ independent random draw over the benchmark (not one fixed mask for all images).
 ```
 pruning.py        prune(feats, k, mode, seed): 'full' | 'random' | 'keep_last_k'
 splice.py         replace image placeholders with k vectors (works for expanded or legacy single <image>)
-eval.py           entrypoint: --bench {gqa,pope,textvqa} --mode {full,random,keep_last_k} --k --seed --limit --source --out
+core.py           model loading, per-sample run (prune + splice + generate), aggregation
+eval.py           entrypoint (one config): --bench {gqa,pope,textvqa} --mode {full,random,keep_last_k} --k --seed --limit --source --out
 data.py           loaders: --source hub (lmms-lab) or a normalized parquet
 prompts.py, metrics.py
 configs/grid.json full pre-registered grid
 data/smoke/       20-sample subsets (POPE: 20 per split), committed
 results/          one JSON per arm × k × benchmark × seed: results/<bench>/<arm>_k<k>_seed<s|NA>.json
-scripts/          smoke.sh, run_grid.sh, summarize.py, make_smoke_subsets.py, make_tiny_llava.py
+scripts/          sweep.py (one model load, resumable, TextVQA gate), gate_textvqa.sh, summarize_step2.py,
+                  audit_llava_protocol.py, make_subsets.py, smoke.sh, run_grid.sh, summarize.py, make_smoke_subsets.py, make_tiny_llava.py
+subsets/          fixed id lists (seed 0): gqa_5k, gqa_1k (⊂ 5k), textvqa_1k, pope_1k_per_split
+third_party/      verbatim LLaVA m4c_evaluator.py; llava_eval/ = official LLaVA-1.5 question files + 13B answers
 tests/            CPU unit tests (+ tiny random LLaVA end-to-end if LHF3_TINY_MODEL is set)
-RUNLOG.md, SMOKE_COMMANDS.md
+RUNLOG.md, SMOKE_COMMANDS.md, STEP2_COMMANDS.md
 ```
 Each JSON has: metrics, `visual_tokens_to_llm`, `sec_per_sample_mean`, `peak_vram_gib`
 (`torch.cuda.max_memory_allocated`, includes weights), full protocol/env, per-sample predictions.

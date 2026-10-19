@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 .venv/
 *.log
+*.partial.jsonl
+*.tmp
+logs/

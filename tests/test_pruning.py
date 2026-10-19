@@ -103,7 +103,7 @@ def test_end_to_end_tiny_llava_cpu():
     and our projector features must equal HF's own get_image_features."""
     from transformers import AutoProcessor, LlavaForConditionalGeneration
     from PIL import Image
-    import eval as ev
+    import core as ev
     import prompts
 
     proc = AutoProcessor.from_pretrained(TINY)
