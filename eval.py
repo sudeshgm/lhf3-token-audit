@@ -12,6 +12,11 @@ Example:
   python eval.py --bench gqa --mode random --k 58 --seed 0 --limit 20 \
       --source data/smoke/gqa.parquet --out results/smoke/gqa/random_k58_seed0.json
 """
+import os
+os.environ.setdefault("USE_TF","0")
+os.environ.setdefault("TRANSFORMERS_NO_TF","1")
+os.environ.setdefault("USE_FLAX","0")
+
 from __future__ import annotations
 
 import argparse
