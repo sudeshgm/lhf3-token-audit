@@ -17,3 +17,20 @@
 
 ## Pending
 - GPU smoke (SMOKE_COMMANDS.md). A failed download / OOM = invalid run, not a no-go.
+
+## 2026-10-19 Smoke test (user GPU: Azure T4 16GB, azureml_py38 env py3.10, fp16)
+Commit 06a4c89. n=20 per bench (POPE 20/split). Model load 169 s from network storage.
+
+| bench | arm | k | seed | vis_tok | score | s/sample | peak GiB |
+|---|---|---|---|---|---|---|---|
+| gqa | full | 576 | - | 576 | acc 0.700 | 0.522 | 13.55 |
+| gqa | keep_last_k | 58 | - | 58 | acc 0.350 | 0.202 | 13.25 |
+| gqa | random | 58 | 0 | 58 | acc 0.550 | 0.199 | 13.25 |
+| pope | full | 576 | - | 576 | ran F1 .889/acc .900; pop .842/.850; adv .762/.750 | 0.479 | 13.55 |
+| pope | keep_last_k | 58 | - | 58 | all splits F1 0.000/acc 0.500 | 0.178 | 13.25 |
+| pope | random | 58 | 0 | 58 | ran .571/.700; pop .706/.750; adv .706/.750 | 0.178 | 13.25 |
+| textvqa | full | 576 | - | 576 | acc 0.410 | 0.689 | 13.70 |
+| textvqa | keep_last_k | 58 | - | 58 | acc 0.300 | 0.366 | 13.36 |
+| textvqa | random | 58 | 0 | 58 | acc 0.400 | 0.348 | 13.36 |
+
+Env fixes needed: torchvision==0.21.0, numpy<2, USE_TF=0, model on local-dir path.
