@@ -91,3 +91,17 @@ Three exact TextVQA prompts fed to the processor (OCR line present):
   in-process TextVQA gate (first 200, full-576, acc ≥ 0.53 else exit 2). Data comes from lmms-lab parquet via hf_hub_download into $HF_HOME.
 - `scripts/summarize_step2.py`: table in pp (full | random-s0 | keep_last per k | seed min/max on 1k), POPE mean F1 over 3 splits + per-split, POPE yes-ratios.
 - CPU validation: tiny random LLaVA, `--limit 3`: gate + all 27 configs ran, resume from a truncated partial file worked, summarize OK. `pytest tests`: 26 passed.
+
+## 2026-10-20 Step 2C Stage-1 sweep (T4, commit e5480cb), gate TextVQA first-200 = 57.15 PASS
+All configs: LLM saw exactly k visual tokens; 0 empty outputs; peak 13.79 GiB.
+
+| metric (pp) | target | full | k144 rnd0 | k144 last | k58 rnd0 | k58 last | k144 seeds 1k min/max | k58 seeds 1k min/max |
+|---|---|---|---|---|---|---|---|---|
+| GQA acc (5k) | 61.9 | 62.8 | 58.8 | 48.7 | 55.2 | 41.3 | 58.2/58.8 | 54.6/54.8 |
+| TextVQA acc | 58.2 | 58.2 | 51.5 | 45.9 | 48.6 | 42.9 | 51.3/52.0 | 47.5/48.9 |
+| POPE F1 mean | 85.9 | 85.9 | 82.3 | 50.8 | 74.4 | 13.7 | 83.1/83.5 | 75.5/76.1 |
+| POPE F1 ran/pop/adv | - | 87.3/86.1/84.2 | 83.3/82.7/81.0 | 51.2/50.9/50.4 | 75.7/74.9/72.7 | 13.7/13.9/13.6 | | |
+| POPE acc mean | - | 87.0 | 84.2 | 66.4 | 78.8 | 53.0 | 84.8/85.0 | 79.5/80.0 |
+
+POPE yes-ratio (ran/pop/adv %): full 40.7/41.9/44.0; rnd k144 38.0/38.5/41.5; last k144 17.8/18.1/18.8; rnd k58 32.0/32.1/34.2; last k58 4.4/3.8/5.0.
+s/sample (full / k144 / k58): GQA 0.59/0.28/0.21; POPE 0.54/0.26/0.19; TextVQA 0.75/0.42/0.37.
